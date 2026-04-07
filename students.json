@@ -1,0 +1,23 @@
+[
+  {
+    "id": "S001",
+    "name": "Carl",
+    "password": "1234",
+    "schoolEmail": "takaedzac@africau.edu",
+    "schoolId": "240073",
+    "degree": "Software Engineering",
+    "gender": "Male",
+    "medicalAid": "First Mutual Life",
+    "specialConditions": "",
+    "checkIn": null,
+    "checkOut": null,
+    "hostelName": "I block",
+    "roomNumber": "I-001",
+    "contact": "+263780834879",
+    "roommateNames": [],
+    "isBlacklisted": false,
+    "warningCount": 0,
+    "photoUrl": "",
+    "isRegistered": false
+  }
+]

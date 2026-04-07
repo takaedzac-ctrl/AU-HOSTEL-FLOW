@@ -1,0 +1,20 @@
+[
+  {
+    "username": "admin",
+    "passwordHash": "admin123",
+    "role": "admin",
+    "studentId": null,
+    "name": "Administrator",
+    "photoUrl": null,
+    "contact": null
+  },
+  {
+    "username": "Mindless",
+    "passwordHash": "mindless123",
+    "role": "admin",
+    "studentId": null,
+    "name": "Mindless Admin",
+    "photoUrl": null,
+    "contact": null
+  }
+]
