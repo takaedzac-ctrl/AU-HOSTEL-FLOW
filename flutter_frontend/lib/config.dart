@@ -1,0 +1,1 @@
+const String apiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://your-railway-app.railway.app');

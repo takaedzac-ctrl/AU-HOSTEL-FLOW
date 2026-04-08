@@ -18,13 +18,10 @@ class AuthResult {
   AuthResult({required this.role, this.student, this.admin});
 }
 
+import '../config.dart';
+
 class AuthService {
-  static String get baseUrl {
-    if (kIsWeb) return 'http://localhost:8080';
-    return defaultTargetPlatform == TargetPlatform.android
-        ? 'http://10.0.2.2:8080'
-        : 'http://localhost:8080';
-  }
+  static String get baseUrl => apiUrl;
 
   List<Hostel> hostels = [];
   List<Student> students = [];
