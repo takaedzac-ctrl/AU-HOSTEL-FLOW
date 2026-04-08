@@ -1,4 +1,4 @@
-FROM dart:stable AS build
+FROM dart:stable
 
 WORKDIR /app
 COPY pubspec.* ./
@@ -8,12 +8,6 @@ COPY . .
 RUN dart pub get --offline
 RUN dart compile exe bin/server.dart -o bin/server
 
-FROM scratch
-COPY --from=build /runtime/ /
-COPY --from=build /app/bin/server /app/bin/
-COPY --from=build /app/*.json /app/
-COPY --from=build /app/au_hostel_flow.db /app/
-WORKDIR /app
 CMD ["/app/bin/server"]
 
 EXPOSE 8080
