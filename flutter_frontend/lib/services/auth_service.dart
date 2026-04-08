@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../config.dart';
 import '../models/hostel.dart';
 import '../models/student.dart';
 import '../models/issue.dart';
@@ -17,8 +18,6 @@ class AuthResult {
 
   AuthResult({required this.role, this.student, this.admin});
 }
-
-import '../config.dart';
 
 class AuthService {
   static String get baseUrl => apiUrl;
