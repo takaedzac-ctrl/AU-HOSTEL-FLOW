@@ -28,11 +28,80 @@
 
 ## Frontend Deployment (Firebase)
 
-1. Install Firebase CLI: `npm install -g firebase-tools`
-2. Login: `firebase login`
-3. Initialize: `firebase init hosting`
-4. Build web app: `flutter build web --release`
-5. Deploy: `firebase deploy`
+1. **Install Firebase CLI:**
+   ```bash
+   npm install -g firebase-tools
+   ```
+
+2. **Login to Firebase:**
+   ```bash
+   firebase login
+   ```
+   - This will open a browser window for authentication
+   - Sign in with your Google account
+
+3. **Initialize Firebase Hosting:**
+   ```bash
+   cd flutter_frontend
+   firebase init hosting
+   ```
+   - Select "Use an existing project" and choose your Firebase project
+   - When asked for the public directory, enter: `build/web`
+   - Configure as a single-page app: **Yes**
+   - Set up automatic builds: **No** (we'll build manually)
+
+4. **Build web app:**
+   ```bash
+   cd flutter_frontend
+   flutter build web --release
+   ```
+   - This creates optimized production files in `flutter_frontend/build/web/`
+   - The build process may take several minutes
+   - Look for "Built build/web" success message
+
+5. **Deploy to Firebase:**
+   ```bash
+   firebase deploy
+   ```
+   - Firebase will upload your files and provide a hosting URL
+   - The URL will look like: `https://your-project-id.web.app`
+   - Copy this URL for updating your API configuration
+
+6. **Update API URL (Important!):**
+   - After deployment, get your Railway backend URL from the Railway dashboard
+   - Update `flutter_frontend/lib/config.dart` with the Railway URL:
+     ```dart
+     const String apiUrl = 'https://your-railway-app.up.railway.app';
+     ```
+   - Rebuild and redeploy the frontend with the correct API URL
+
+## Troubleshooting Firebase Deployment
+
+**Common Issues:**
+
+1. **"flutter build web --release" fails:**
+   - Ensure you're in the `flutter_frontend` directory
+   - Run `flutter pub get` first
+   - Check for any compilation errors in your Flutter code
+
+2. **Firebase login issues:**
+   - Make sure you have Node.js and npm installed
+   - Try `firebase logout` then `firebase login` again
+   - Check that you're logged into the correct Google account
+
+3. **Build files not found during deploy:**
+   - Ensure the build completed successfully
+   - Check that `flutter_frontend/build/web/` directory exists
+   - Verify `firebase.json` has the correct public directory: `"public": "build/web"`
+
+4. **CORS errors after deployment:**
+   - Make sure your Railway backend allows requests from your Firebase domain
+   - Check that the API URL in `config.dart` is correct
+
+5. **App not loading:**
+   - Check Firebase hosting logs in the Firebase console
+   - Verify all asset files were uploaded correctly
+   - Test the Firebase URL directly in a browser
 
 ## Environment Variables
 
