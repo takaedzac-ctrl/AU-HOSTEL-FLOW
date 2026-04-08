@@ -13,6 +13,7 @@ class Student {
   final String hostelName;
   final String roomNumber;
   final String contact;
+  final String address;
   final List<String> roommateNames;
   final bool isBlacklisted;
   final int warningCount;
@@ -34,6 +35,7 @@ class Student {
     required this.hostelName,
     required this.roomNumber,
     required this.contact,
+    required this.address,
     required this.roommateNames,
     this.isBlacklisted = false,
     this.warningCount = 0,
@@ -53,10 +55,12 @@ class Student {
       medicalAid: json['medicalAid'] ?? '',
       specialConditions: json['specialConditions'] ?? '',
       checkIn: json['checkIn'] != null ? DateTime.parse(json['checkIn']) : null,
-      checkOut: json['checkOut'] != null ? DateTime.parse(json['checkOut']) : null,
+      checkOut:
+          json['checkOut'] != null ? DateTime.parse(json['checkOut']) : null,
       hostelName: json['hostelName'] ?? '',
       roomNumber: json['roomNumber'] ?? '',
       contact: json['contact'] ?? '',
+      address: json['address'] ?? '',
       roommateNames: List<String>.from(json['roommateNames'] ?? []),
       isBlacklisted: json['isBlacklisted'] ?? false,
       warningCount: json['warningCount'] ?? 0,
@@ -80,11 +84,7 @@ class Student {
         'hostelName': hostelName,
         'roomNumber': roomNumber,
         'contact': contact,
-        'roommateNames': roommateNames,
-        'isBlacklisted': isBlacklisted,
-        'warningCount': warningCount,
-        'photoUrl': photoUrl,
-        'isRegistered': isRegistered,
+        'address': address,
       };
 
   Student copyWith({
@@ -98,6 +98,7 @@ class Student {
     int? warningCount,
     String? photoUrl,
     String? contact,
+    String? address,
   }) {
     return Student(
       id: id,
@@ -114,6 +115,7 @@ class Student {
       hostelName: hostelName,
       roomNumber: roomNumber,
       contact: contact ?? this.contact,
+      address: address ?? this.address,
       roommateNames: roommateNames,
       isBlacklisted: isBlacklisted ?? this.isBlacklisted,
       warningCount: warningCount ?? this.warningCount,
@@ -122,4 +124,3 @@ class Student {
     );
   }
 }
-

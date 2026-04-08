@@ -93,33 +93,39 @@ class ApiServer {
 
       if (role == 'admin') {
         final user = DataStorage.users.firstWhere(
-          (u) => u.username.toLowerCase() == normalizedUsername && u.role == UserRole.admin,
-          orElse: () => User(username: '', passwordHash: '', role: UserRole.admin),
+          (u) =>
+              u.username.toLowerCase() == normalizedUsername &&
+              u.role == UserRole.admin,
+          orElse: () =>
+              User(username: '', passwordHash: '', role: UserRole.admin),
         );
-        
+
         if (user.username.isNotEmpty) {
           // Compare passwords (trim both for consistency)
           final storedPasswordTrimmed = user.passwordHash.trim();
-          final adminPasswordMatches = storedPasswordTrimmed == password || storedPasswordTrimmed == trimmedPassword;
-          
+          final adminPasswordMatches = storedPasswordTrimmed == password ||
+              storedPasswordTrimmed == trimmedPassword;
+
           if (adminPasswordMatches) {
             return Response.ok(
-              jsonEncode({'success': true, 'role': 'admin', 'user': user.toJson()}),
+              jsonEncode(
+                  {'success': true, 'role': 'admin', 'user': user.toJson()}),
               headers: {'Content-Type': 'application/json'},
             );
           }
         }
       } else if (role == 'student') {
         for (var student in DataStorage.students) {
-          final matchesStudent = student.id.toLowerCase() == normalizedUsername ||
-              student.schoolId.toLowerCase() == normalizedUsername ||
-              student.schoolEmail.toLowerCase() == normalizedUsername;
-          
+          final matchesStudent =
+              student.id.toLowerCase() == normalizedUsername ||
+                  student.schoolId.toLowerCase() == normalizedUsername ||
+                  student.schoolEmail.toLowerCase() == normalizedUsername;
+
           // Compare passwords (trim both for consistency)
           final storedPasswordTrimmed = student.password.trim();
-          final studentPasswordMatches =
-              storedPasswordTrimmed == password || storedPasswordTrimmed == trimmedPassword;
-          
+          final studentPasswordMatches = storedPasswordTrimmed == password ||
+              storedPasswordTrimmed == trimmedPassword;
+
           if (matchesStudent && studentPasswordMatches) {
             return Response.ok(
               jsonEncode({
@@ -153,29 +159,51 @@ class ApiServer {
       final role = data['role'];
 
       if (role == 'student') {
-        final normalized = username.toLowerCase();
-        final exists = DataStorage.students.any(
-          (s) =>
-              s.id.toLowerCase() == normalized ||
-              s.schoolId.toLowerCase() == normalized ||
-              s.schoolEmail.toLowerCase() == normalized,
-        );
-        if (exists) {
+        final name = (data['name'] ?? '').toString().trim();
+        final address = (data['address'] ?? '').toString().trim();
+        final schoolEmail =
+            (data['schoolEmail'] ?? '').toString().trim().toLowerCase();
+        final schoolId =
+            (data['schoolId'] ?? '').toString().trim().toUpperCase();
+        final normalized = schoolId.toLowerCase();
+
+        if (name.isEmpty ||
+            address.isEmpty ||
+            schoolEmail.isEmpty ||
+            schoolId.isEmpty ||
+            password == null ||
+            password.toString().isEmpty) {
           return Response.badRequest(
-            body: jsonEncode({'success': false, 'message': 'Student account already exists'}),
+            body: jsonEncode({
+              'success': false,
+              'message': 'All student fields are required'
+            }),
             headers: {'Content-Type': 'application/json'},
           );
         }
 
-        final generatedId = username.contains('@')
-            ? 'S${DateTime.now().millisecondsSinceEpoch}'
-            : username.toUpperCase();
+        final exists = DataStorage.students.any(
+          (s) =>
+              s.id.toLowerCase() == normalized ||
+              s.schoolId.toLowerCase() == normalized ||
+              s.schoolEmail.toLowerCase() == schoolEmail,
+        );
+        if (exists) {
+          return Response.badRequest(
+            body: jsonEncode({
+              'success': false,
+              'message': 'Student account already exists'
+            }),
+            headers: {'Content-Type': 'application/json'},
+          );
+        }
+
         final newStudent = Student(
-          id: generatedId,
-          name: username.contains('@') ? username.split('@').first : username,
+          id: schoolId,
+          name: name,
           password: password,
-          schoolEmail: username.contains('@') ? username.toLowerCase() : '${username.toLowerCase()}@africau.edu',
-          schoolId: generatedId,
+          schoolEmail: schoolEmail,
+          schoolId: schoolId,
           degree: '',
           gender: '',
           medicalAid: '',
@@ -183,12 +211,14 @@ class ApiServer {
           hostelName: '',
           roomNumber: '',
           contact: '',
+          address: address,
           roommateNames: [],
         );
         DataStorage.students.add(newStudent);
         await DataStorage.saveStudents();
         return Response.ok(
-          jsonEncode({'success': true, 'message': 'New account created successfully'}),
+          jsonEncode(
+              {'success': true, 'message': 'New account created successfully'}),
           headers: {'Content-Type': 'application/json'},
         );
       }
@@ -213,7 +243,8 @@ class ApiServer {
 
       if (newPassword.isEmpty) {
         return Response.badRequest(
-          body: jsonEncode({'success': false, 'message': 'New password is required'}),
+          body: jsonEncode(
+              {'success': false, 'message': 'New password is required'}),
           headers: {'Content-Type': 'application/json'},
         );
       }
@@ -238,6 +269,7 @@ class ApiServer {
             hostelName: '',
             roomNumber: '',
             contact: '',
+            address: '',
             roommateNames: [],
           ),
         );
@@ -245,21 +277,26 @@ class ApiServer {
           student.password = newPassword;
           await DataStorage.saveStudents();
           return Response.ok(
-            jsonEncode({'success': true, 'message': 'Password updated successfully'}),
+            jsonEncode(
+                {'success': true, 'message': 'Password updated successfully'}),
             headers: {'Content-Type': 'application/json'},
           );
         }
       } else if (role == 'admin') {
         final normalized = (username ?? '').toString().trim().toLowerCase();
         final user = DataStorage.users.firstWhere(
-          (u) => u.username.toLowerCase() == normalized && u.role == UserRole.admin,
-          orElse: () => User(username: '', passwordHash: '', role: UserRole.admin),
+          (u) =>
+              u.username.toLowerCase() == normalized &&
+              u.role == UserRole.admin,
+          orElse: () =>
+              User(username: '', passwordHash: '', role: UserRole.admin),
         );
         if (user.username.isNotEmpty) {
           user.passwordHash = newPassword;
           await DataStorage.saveUsers();
           return Response.ok(
-            jsonEncode({'success': true, 'message': 'Password updated successfully'}),
+            jsonEncode(
+                {'success': true, 'message': 'Password updated successfully'}),
             headers: {'Content-Type': 'application/json'},
           );
         }
@@ -331,9 +368,11 @@ class ApiServer {
     try {
       final body = await request.readAsString();
       final data = jsonDecode(body);
-      final studentId = (data['studentId'] ?? '').toString().trim().toLowerCase();
+      final studentId =
+          (data['studentId'] ?? '').toString().trim().toLowerCase();
       final blockId = (data['blockId'] ?? '').toString().trim().toUpperCase();
-      final roomNumber = (data['roomNumber'] ?? '').toString().trim().toUpperCase();
+      final roomNumber =
+          (data['roomNumber'] ?? '').toString().trim().toUpperCase();
 
       final student = DataStorage.students.firstWhere(
         (s) => s.id.toLowerCase() == studentId,
@@ -354,21 +393,30 @@ class ApiServer {
       if (gender.isEmpty) {
         return Response(
           400,
-          body: jsonEncode({'success': false, 'message': 'Student gender is required for allocation'}),
+          body: jsonEncode({
+            'success': false,
+            'message': 'Student gender is required for allocation'
+          }),
           headers: {'Content-Type': 'application/json'},
         );
       }
       if (_isFemale(gender) && !_isGirlsBlock(hostel.id)) {
         return Response(
           400,
-          body: jsonEncode({'success': false, 'message': 'Female students can only be allocated to A-H'}),
+          body: jsonEncode({
+            'success': false,
+            'message': 'Female students can only be allocated to A-H'
+          }),
           headers: {'Content-Type': 'application/json'},
         );
       }
       if (_isMale(gender) && !_isBoysBlock(hostel.id)) {
         return Response(
           400,
-          body: jsonEncode({'success': false, 'message': 'Male students can only be allocated to I-L'}),
+          body: jsonEncode({
+            'success': false,
+            'message': 'Male students can only be allocated to I-L'
+          }),
           headers: {'Content-Type': 'application/json'},
         );
       }
@@ -400,7 +448,8 @@ class ApiServer {
     try {
       final body = await request.readAsString();
       final data = jsonDecode(body);
-      final studentId = (data['studentId'] ?? '').toString().trim().toLowerCase();
+      final studentId =
+          (data['studentId'] ?? '').toString().trim().toLowerCase();
 
       final student = DataStorage.students.firstWhere(
         (s) => s.id.toLowerCase() == studentId,
@@ -423,14 +472,19 @@ class ApiServer {
       if (studentGender.isEmpty) {
         return Response(
           400,
-          body: jsonEncode({'success': false, 'message': 'Student gender is required for allocation'}),
+          body: jsonEncode({
+            'success': false,
+            'message': 'Student gender is required for allocation'
+          }),
           headers: {'Content-Type': 'application/json'},
         );
       }
       final shouldAllocateGirls = _isFemale(studentGender);
 
       for (final hostel in DataStorage.hostels) {
-        final allowedBlock = shouldAllocateGirls ? _isGirlsBlock(hostel.id) : _isBoysBlock(hostel.id);
+        final allowedBlock = shouldAllocateGirls
+            ? _isGirlsBlock(hostel.id)
+            : _isBoysBlock(hostel.id);
         if (!allowedBlock) {
           continue;
         }
@@ -486,7 +540,10 @@ class ApiServer {
     try {
       if (!DataStorage.applicationsOpen) {
         return Response.forbidden(
-          jsonEncode({'success': false, 'message': 'Applications are currently closed'}),
+          jsonEncode({
+            'success': false,
+            'message': 'Applications are currently closed'
+          }),
           headers: {'Content-Type': 'application/json'},
         );
       }
@@ -502,7 +559,10 @@ class ApiServer {
 
       if (student.isBlacklisted) {
         return Response.forbidden(
-          jsonEncode({'success': false, 'message': 'You are blacklisted from applying'}),
+          jsonEncode({
+            'success': false,
+            'message': 'You are blacklisted from applying'
+          }),
           headers: {'Content-Type': 'application/json'},
         );
       }
@@ -654,7 +714,8 @@ class ApiServer {
     }
   }
 
-  Future<Response> _handleUpdateStudentWarnings(Request request, String id) async {
+  Future<Response> _handleUpdateStudentWarnings(
+      Request request, String id) async {
     try {
       final student = DataStorage.students.firstWhere(
         (s) => s.id == id,
@@ -663,7 +724,8 @@ class ApiServer {
       final body = await request.readAsString();
       final data = jsonDecode(body);
       final delta = data['delta'] ?? 1;
-      student.warningCount = (student.warningCount + delta).clamp(0, 10).toInt();
+      student.warningCount =
+          (student.warningCount + delta).clamp(0, 10).toInt();
       await DataStorage.saveStudents();
       return Response.ok(
         jsonEncode(student.toJson()),
@@ -676,7 +738,8 @@ class ApiServer {
     }
   }
 
-  Future<Response> _handleUpdateStudentBlacklist(Request request, String id) async {
+  Future<Response> _handleUpdateStudentBlacklist(
+      Request request, String id) async {
     try {
       final student = DataStorage.students.firstWhere(
         (s) => s.id == id,
@@ -733,7 +796,9 @@ class ApiServer {
 
       if (role == 'admin') {
         final user = DataStorage.users.firstWhere(
-          (u) => u.username.toLowerCase() == normalizedUsername && u.role == UserRole.admin,
+          (u) =>
+              u.username.toLowerCase() == normalizedUsername &&
+              u.role == UserRole.admin,
         );
         if (user.passwordHash == oldPassword) {
           user.passwordHash = newPassword;
@@ -753,13 +818,16 @@ class ApiServer {
           return Response.ok(jsonEncode({'success': true}));
         }
       }
-      return Response.forbidden(jsonEncode({'success': false, 'message': 'Invalid old password'}));
+      return Response.forbidden(
+          jsonEncode({'success': false, 'message': 'Invalid old password'}));
     } catch (e) {
-      return Response.internalServerError(body: jsonEncode({'error': e.toString()}));
+      return Response.internalServerError(
+          body: jsonEncode({'error': e.toString()}));
     }
   }
 
-  Future<Response> _handleUpdateStudentProfile(Request request, String id) async {
+  Future<Response> _handleUpdateStudentProfile(
+      Request request, String id) async {
     try {
       final body = await request.readAsString();
       final data = jsonDecode(body);
@@ -767,26 +835,40 @@ class ApiServer {
       if (data.containsKey('photoUrl')) student.photoUrl = data['photoUrl'];
       if (data.containsKey('contact')) student.contact = data['contact'];
       await DataStorage.saveStudents();
-      return Response.ok(jsonEncode(student.toJson()), headers: {'Content-Type': 'application/json'});
-    } catch(e) { return Response.internalServerError(body: jsonEncode({'error': e.toString()})); }
+      return Response.ok(jsonEncode(student.toJson()),
+          headers: {'Content-Type': 'application/json'});
+    } catch (e) {
+      return Response.internalServerError(
+          body: jsonEncode({'error': e.toString()}));
+    }
   }
 
-  Future<Response> _handleUpdateAdminProfile(Request request, String username) async {
+  Future<Response> _handleUpdateAdminProfile(
+      Request request, String username) async {
     try {
       final body = await request.readAsString();
       final data = jsonDecode(body);
-      final user = DataStorage.users.firstWhere((u) => u.username == username && u.role == UserRole.admin);
+      final user = DataStorage.users.firstWhere(
+          (u) => u.username == username && u.role == UserRole.admin);
       if (data.containsKey('photoUrl')) user.photoUrl = data['photoUrl'];
       if (data.containsKey('name')) user.name = data['name'];
       if (data.containsKey('contact')) user.contact = data['contact'];
       await DataStorage.saveUsers();
-      return Response.ok(jsonEncode(user.toJson()), headers: {'Content-Type': 'application/json'});
-    } catch(e) { return Response.internalServerError(body: jsonEncode({'error': e.toString()})); }
+      return Response.ok(jsonEncode(user.toJson()),
+          headers: {'Content-Type': 'application/json'});
+    } catch (e) {
+      return Response.internalServerError(
+          body: jsonEncode({'error': e.toString()}));
+    }
   }
 
   Future<Response> _handleGetAdmins(Request request) async {
-    final admins = DataStorage.users.where((u) => u.role == UserRole.admin).map((u) => u.toJson()).toList();
-    return Response.ok(jsonEncode(admins), headers: {'Content-Type': 'application/json'});
+    final admins = DataStorage.users
+        .where((u) => u.role == UserRole.admin)
+        .map((u) => u.toJson())
+        .toList();
+    return Response.ok(jsonEncode(admins),
+        headers: {'Content-Type': 'application/json'});
   }
 
   Future<Response> _handleAddAdmin(Request request) async {
@@ -796,16 +878,26 @@ class ApiServer {
       data['role'] = 'admin'; // ensure role is set
       final user = User.fromJson(data);
       if (DataStorage.users.any((u) => u.username == user.username)) {
-         return Response.badRequest(body: jsonEncode({'success': false, 'message': 'Admin username already exists'}));
+        return Response.badRequest(
+            body: jsonEncode({
+          'success': false,
+          'message': 'Admin username already exists'
+        }));
       }
       DataStorage.users.add(user);
       await DataStorage.saveUsers();
-      return Response.ok(jsonEncode(user.toJson()), headers: {'Content-Type': 'application/json'});
-    } catch(e) { return Response.internalServerError(body: jsonEncode({'error': e.toString()})); }
+      return Response.ok(jsonEncode(user.toJson()),
+          headers: {'Content-Type': 'application/json'});
+    } catch (e) {
+      return Response.internalServerError(
+          body: jsonEncode({'error': e.toString()}));
+    }
   }
 
   Future<Response> _handleGetAnnouncements(Request request) async {
-    return Response.ok(jsonEncode(DataStorage.announcements.map((a) => a.toJson()).toList()), headers: {'Content-Type': 'application/json'});
+    return Response.ok(
+        jsonEncode(DataStorage.announcements.map((a) => a.toJson()).toList()),
+        headers: {'Content-Type': 'application/json'});
   }
 
   Future<Response> _handleAddAnnouncement(Request request) async {
@@ -813,11 +905,17 @@ class ApiServer {
       final body = await request.readAsString();
       final data = jsonDecode(body);
       final ann = Announcement.fromJson(data);
-      if (ann.id.isEmpty) { ann.id = DateTime.now().millisecondsSinceEpoch.toString(); }
+      if (ann.id.isEmpty) {
+        ann.id = DateTime.now().millisecondsSinceEpoch.toString();
+      }
       DataStorage.announcements.add(ann);
       await DataStorage.saveAnnouncements();
-      return Response.ok(jsonEncode(ann.toJson()), headers: {'Content-Type': 'application/json'});
-    } catch(e) { return Response.internalServerError(body: jsonEncode({'error': e.toString()})); }
+      return Response.ok(jsonEncode(ann.toJson()),
+          headers: {'Content-Type': 'application/json'});
+    } catch (e) {
+      return Response.internalServerError(
+          body: jsonEncode({'error': e.toString()}));
+    }
   }
 
   Future<void> startServer() async {

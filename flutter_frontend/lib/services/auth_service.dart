@@ -53,15 +53,20 @@ class AuthService {
         issues = issuesData.map((i) => Issue.fromJson(i)).toList();
       }
 
-      final applicationsResponse = await http.get(Uri.parse('$baseUrl/applications'));
+      final applicationsResponse =
+          await http.get(Uri.parse('$baseUrl/applications'));
       if (applicationsResponse.statusCode == 200) {
-        final applicationsData = jsonDecode(applicationsResponse.body) as List<dynamic>;
-        applications = applicationsData.map((a) => AccommodationApplication.fromJson(a)).toList();
+        final applicationsData =
+            jsonDecode(applicationsResponse.body) as List<dynamic>;
+        applications = applicationsData
+            .map((a) => AccommodationApplication.fromJson(a))
+            .toList();
       }
 
       final settingsResponse = await http.get(Uri.parse('$baseUrl/settings'));
       if (settingsResponse.statusCode == 200) {
-        final settings = jsonDecode(settingsResponse.body) as Map<String, dynamic>;
+        final settings =
+            jsonDecode(settingsResponse.body) as Map<String, dynamic>;
         applicationsOpen = settings['applicationsOpen'] ?? true;
       }
     } catch (_) {}
@@ -101,7 +106,8 @@ class AuthService {
 
       try {
         final data = jsonDecode(response.body);
-        lastError = data['message']?.toString() ?? 'Login failed (${response.statusCode})';
+        lastError = data['message']?.toString() ??
+            'Login failed (${response.statusCode})';
       } catch (_) {
         lastError = 'Login failed (${response.statusCode})';
       }
@@ -116,16 +122,26 @@ class AuthService {
     required UserRole role,
     required String username,
     required String password,
+    String? name,
+    String? address,
+    String? schoolEmail,
+    String? schoolId,
   }) async {
     try {
+      final payload = {
+        'role': role == UserRole.admin ? 'admin' : 'student',
+        'username': username,
+        'password': password,
+      };
+      if (name != null) payload['name'] = name;
+      if (address != null) payload['address'] = address;
+      if (schoolEmail != null) payload['schoolEmail'] = schoolEmail;
+      if (schoolId != null) payload['schoolId'] = schoolId;
+
       final response = await http.post(
         Uri.parse('$baseUrl/auth/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'role': role == UserRole.admin ? 'admin' : 'student',
-          'username': username,
-          'password': password,
-        }),
+        body: jsonEncode(payload),
       );
 
       if (response.statusCode == 200) {
@@ -220,7 +236,8 @@ class AuthService {
     }
   }
 
-  Future<bool> submitAccommodationApplication(AccommodationApplication application) async {
+  Future<bool> submitAccommodationApplication(
+      AccommodationApplication application) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/applications'),
@@ -318,7 +335,8 @@ class AuthService {
     return true;
   }
 
-  bool canSubmitApplication() => applicationsOpen && hostels.any((h) => h.availableSpots > 0);
+  bool canSubmitApplication() =>
+      applicationsOpen && hostels.any((h) => h.availableSpots > 0);
 
   Future<bool> acceptApplication(String studentId) async {
     final app = applications.firstWhere(
@@ -475,7 +493,9 @@ class AuthService {
         return data['success'] ?? false;
       }
       return false;
-    } catch (_) { return false; }
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<bool> updateAdminProfile(User user) async {
@@ -485,9 +505,13 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(user.toJson()),
       );
-      if (response.statusCode == 200) { return true; }
+      if (response.statusCode == 200) {
+        return true;
+      }
       return false;
-    } catch (_) { return false; }
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<List<User>> getAdmins() async {
@@ -508,7 +532,9 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(admin.toJson()),
       );
-      if (response.statusCode == 200) { return true; }
+      if (response.statusCode == 200) {
+        return true;
+      }
     } catch (_) {}
     return false;
   }
@@ -531,7 +557,9 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(ann.toJson()),
       );
-      if (response.statusCode == 200) { return true; }
+      if (response.statusCode == 200) {
+        return true;
+      }
     } catch (_) {}
     return false;
   }

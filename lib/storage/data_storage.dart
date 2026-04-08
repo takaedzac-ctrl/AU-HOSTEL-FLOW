@@ -113,8 +113,10 @@ class DataStorage {
 
   static Future<void> loadApplications() async {
     final data = _loadCollection('applications');
-    applications =
-        data.map<AccommodationApplication>((e) => AccommodationApplication.fromJson(e)).toList();
+    applications = data
+        .map<AccommodationApplication>(
+            (e) => AccommodationApplication.fromJson(e))
+        .toList();
   }
 
   static Future<void> saveIssues() async =>
@@ -132,7 +134,8 @@ class DataStorage {
 
   static Future<void> loadAnnouncements() async {
     final data = _loadCollection('announcements');
-    announcements = data.map<Announcement>((e) => Announcement.fromJson(e)).toList();
+    announcements =
+        data.map<Announcement>((e) => Announcement.fromJson(e)).toList();
   }
 
   static Future<void> savePolicies() async {
@@ -170,11 +173,14 @@ class DataStorage {
 
   static void autoAllocateRooms() {
     // Find students without rooms
-    final unallocatedStudents = students.where((s) => s.roomNumber.isEmpty).toList();
+    final unallocatedStudents =
+        students.where((s) => s.roomNumber.isEmpty).toList();
 
     for (final student in unallocatedStudents) {
       // Find suitable hostels based on gender
-      final suitableHostels = hostels.where((h) => h.gender == student.gender || h.gender == 'Mixed').toList();
+      final suitableHostels = hostels
+          .where((h) => h.gender == student.gender || h.gender == 'Mixed')
+          .toList();
 
       for (final hostel in suitableHostels) {
         // Find available rooms
@@ -199,13 +205,20 @@ class DataStorage {
 
   static void _initDatabase() {
     _db ??= sqlite3.open(_dbFile);
-    _db!.execute('CREATE TABLE IF NOT EXISTS students (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
-    _db!.execute('CREATE TABLE IF NOT EXISTS hostels (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
-    _db!.execute('CREATE TABLE IF NOT EXISTS applications (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
-    _db!.execute('CREATE TABLE IF NOT EXISTS issues (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
-    _db!.execute('CREATE TABLE IF NOT EXISTS users (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
-    _db!.execute('CREATE TABLE IF NOT EXISTS announcements (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
-    _db!.execute('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
+    _db!.execute(
+        'CREATE TABLE IF NOT EXISTS students (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
+    _db!.execute(
+        'CREATE TABLE IF NOT EXISTS hostels (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
+    _db!.execute(
+        'CREATE TABLE IF NOT EXISTS applications (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
+    _db!.execute(
+        'CREATE TABLE IF NOT EXISTS issues (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
+    _db!.execute(
+        'CREATE TABLE IF NOT EXISTS users (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
+    _db!.execute(
+        'CREATE TABLE IF NOT EXISTS announcements (key TEXT PRIMARY KEY, data TEXT NOT NULL)');
+    _db!.execute(
+        'CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
   }
 
   static List<Map<String, dynamic>> _loadCollection(String table) {
@@ -223,7 +236,9 @@ class DataStorage {
     final stmt = _db!.prepare('INSERT INTO $table(key, data) VALUES(?, ?)');
     try {
       for (final item in items) {
-        final key = (item['id'] ?? item['username'] ?? DateTime.now().microsecondsSinceEpoch)
+        final key = (item['id'] ??
+                item['username'] ??
+                DateTime.now().microsecondsSinceEpoch)
             .toString();
         stmt.execute([key, jsonEncode(item)]);
       }
@@ -233,7 +248,8 @@ class DataStorage {
   }
 
   static Future<void> _bootstrapFromLegacyJsonIfNeeded() async {
-    final hasStudents = _db!.select('SELECT 1 FROM students LIMIT 1').isNotEmpty;
+    final hasStudents =
+        _db!.select('SELECT 1 FROM students LIMIT 1').isNotEmpty;
     if (hasStudents) return;
 
     await _importLegacyList('students.json', 'students');
@@ -245,7 +261,8 @@ class DataStorage {
 
     final policies = File('policies.json');
     if (policies.existsSync()) {
-      final data = jsonDecode(policies.readAsStringSync()) as Map<String, dynamic>;
+      final data =
+          jsonDecode(policies.readAsStringSync()) as Map<String, dynamic>;
       applicationsOpen = data['applicationsOpen'] ?? true;
       await savePolicies();
     }
@@ -287,6 +304,7 @@ class DataStorage {
         hostelName: "A block",
         roomNumber: "A-001",
         contact: "+263 77 100 0001",
+        address: "1 University Road",
         roommateNames: ["Rita", "Trust"],
       ),
       Student(
@@ -302,6 +320,7 @@ class DataStorage {
         hostelName: "I block",
         roomNumber: "I-003",
         contact: "+263 77 100 0002",
+        address: "2 College Avenue",
         roommateNames: ["Nelson", "Patience"],
       ),
     ];
