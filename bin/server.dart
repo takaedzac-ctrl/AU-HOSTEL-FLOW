@@ -1,7 +1,6 @@
-import 'package:au_hostel_flow/api_server.dart';#!/usr/bin/env bash
+import 'package:au_hostel_flow/api_server.dart';
 
-
-
-
-
-}  await server.start();  final server = ApiServer();void main() async {dart run bin/server.dart
+void main() async {
+  final server = ApiServer();
+  await server.startServer();
+}
