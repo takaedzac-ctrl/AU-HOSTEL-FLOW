@@ -49,6 +49,8 @@
    - When asked for the public directory, enter: `build/web`
    - Configure as a single-page app: **Yes**
    - Set up automatic builds: **No** (we'll build manually)
+   - After initialization, verify `.firebaserc` contains your real Firebase project ID
+     rather than `your-project-id`
 
 4. **Build web app:**
    ```bash
