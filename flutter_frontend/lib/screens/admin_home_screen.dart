@@ -509,8 +509,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           newAdminUsernameController.clear();
                           newAdminPasswordController.clear();
                         } else {
-                          if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to add admin.')));
+                          if (mounted) {
+                            // ignore: use_build_context_synchronously
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to add admin.')));
+                          }
                         }
                       },
                       child: const Text('Add Admin'),

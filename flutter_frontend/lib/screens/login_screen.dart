@@ -296,8 +296,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 username: usernameController.text.trim(),
                 password: passwordController.text,
               );
-              Navigator.of(context).pop();
               if (!context.mounted) return;
+              Navigator.of(context).pop();
               if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Account created successfully')),
@@ -349,8 +349,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 username: usernameController.text.trim(),
                 newPassword: newPasswordController.text.trim(),
               );
-              Navigator.of(context).pop();
               if (!context.mounted) return;
+              Navigator.of(context).pop();
               if (message != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(message)),
