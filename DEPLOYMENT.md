@@ -30,8 +30,10 @@
 
 1. **Install Firebase CLI:**
    ```bash
-   npm install -g firebase-tools
+   npm.cmd install -g firebase-tools
    ```
+   - On Windows PowerShell, use `npm.cmd` instead of `npm`
+   - This avoids execution policy issues with `npm.ps1`
 
 2. **Login to Firebase:**
    ```bash
@@ -88,8 +90,17 @@
 
 2. **Firebase login issues:**
    - Make sure you have Node.js and npm installed
+   - On Windows PowerShell, use `npm.cmd` instead of `npm` to avoid execution policy errors
    - Try `firebase logout` then `firebase login` again
    - Check that you're logged into the correct Google account
+
+3. **PowerShell execution policy errors:**
+   - If you get "running scripts is disabled" errors, use `npm.cmd` instead of `npm`
+   - Alternative: Run PowerShell as Administrator and execute:
+     ```powershell
+     Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+     ```
+   - Or use `npx firebase-tools` commands instead of global `firebase`
 
 3. **Build files not found during deploy:**
    - Ensure the build completed successfully
